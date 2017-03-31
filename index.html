@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Assert it!</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="resources/css/reveal.css">
+		<link rel="stylesheet" href="resources/css/theme/beige.css" id="theme">
+		<link rel="stylesheet" href="resources/css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="resources/lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'resources/css/print/pdf.css' : 'resources/css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Assert it well!</h1>
+					<p>
+						<small>Adam Puchalski</small>
+					</p>
+					<aside class="notes">
+						Press: 's' for presenter window<p>
+						'ESC' for a global overview	
+					</aside>
+				</section>
+				
+				<section>
+					<h2>Diner Party!</h2>
+<pre><code class="Java" data-trim contenteditable>
+@Test
+ public void host_dinner_party_where_nobody_dies() {
+   Mansion mansion = new Mansion();
+   mansion.hostPotentiallyMurderousDinnerParty();
+   assertThat(mansion.guests()).as("Living Guests").isEqualTo(7);
+   assertThat(mansion.kitchen()).as("Kitchen").isEqualTo("clean");
+   assertThat(mansion.library()).as("Library").isEqualTo("clean");
+   assertThat(mansion.revolverAmmo()).as("Revolver Ammo").isEqualTo(6);
+   assertThat(mansion.candlestick()).as("Candlestick").isEqualTo("pristine");
+   assertThat(mansion.colonel()).as("Colonel").isEqualTo("well kempt");
+   assertThat(mansion.professor()).as("Professor").isEqualTo("well kempt");
+ }
+</code></pre>
+				</section>
+				
+				<section>
+					<h2>Unfortunately though</h2>
+<pre><code class="Java" data-trim contenteditable>
+org.junit.ComparisonFailure: [Living Guests] expected:<[7]> but was:<[6]>
+</code></pre>
+				</section>
+				
+				<section>
+					<h2>So</h2>
+					<ul>
+						<li>A guest has been murdered! But where, how, and by whom?
+						<li>So.
+						<li>You have to host the Dinner Party <b>again</b>.
+						<li>Given that hosting dinner parties takes a long time, this seems <b>rather inefficient</b>.
+					</ul>
+				</section>
+	
+				<section data-transition="slide" data-background="orange" data-background-transition="zoom">
+					<h2>How to improve it to host a party only once?</h2>
+				</section>
+				
+				<section>
+					<h2>Solution! </h2>
+					<b>SoftAssertions </b>
+				</section>
+				
+								<section>
+					<h2>Better Diner Party!</h2>
+<pre><code class="Java" data-trim contenteditable>
+@Test
+ public void host_dinner_party_where_nobody_dies() {
+   Mansion mansion = new Mansion();
+   mansion.hostPotentiallyMurderousDinnerParty();
+   SoftAssertions softly = new SoftAssertions();
+   softly.assertThat(mansion.guests()).as("Living Guests").isEqualTo(7);
+   softly.assertThat(mansion.kitchen()).as("Kitchen").isEqualTo("clean");
+   softly.assertThat(mansion.library()).as("Library").isEqualTo("clean");
+   softly.assertThat(mansion.revolverAmmo()).as("Revolver Ammo").isEqualTo(6);
+   softly.assertThat(mansion.candlestick()).as("Candlestick").isEqualTo("pristine");
+   softly.assertThat(mansion.colonel()).as("Colonel").isEqualTo("well kempt");
+   softly.assertThat(mansion.professor()).as("Professor").isEqualTo("well kempt");
+   softly.assertAll();
+ }
+</code></pre>
+				</section>
+				
+				<section>
+					<h2>Ends in the same manner but...</h2>
+<pre><code class="Java" data-trim contenteditable>
+ org.assertj.core.api.SoftAssertionError: The following 4 assertions failed:
+ 1) [Living Guests] expected:<[7]> but was:<[6]>
+ 2) [Library] expected:<'[clean]'> but was:<'[messy]'>
+ 3) [Candlestick] expected:<'[pristine]'> but was:<'[bent]'>
+ 4) [Professor] expected:<'[well kempt]'> but was:<'[bloodied and disheveled]'>
+</code></pre>
+				</section>
+				
+				<section>
+					<h2>Even Better Diner Party!</h2>
+<pre><code class="Java" data-trim contenteditable>
+@Test
+ public void host_dinner_party_where_nobody_dies() {
+   Mansion mansion = new Mansion();
+   mansion.hostPotentiallyMurderousDinnerParty();
+   SoftAssertions.assertSoftly(softly -> {
+     softly.assertThat(mansion.guests()).as("Living Guests").isEqualTo(7);
+     softly.assertThat(mansion.kitchen()).as("Kitchen").isEqualTo("clean");
+     softly.assertThat(mansion.library()).as("Library").isEqualTo("clean");
+     softly.assertThat(mansion.revolverAmmo()).as("Revolver Ammo").isEqualTo(6);
+     softly.assertThat(mansion.candlestick()).as("Candlestick").isEqualTo("pristine");
+     softly.assertThat(mansion.colonel()).as("Colonel").isEqualTo("well kempt");
+     softly.assertThat(mansion.professor()).as("Professor").isEqualTo("well kempt");
+   });
+ }
+</code></pre>
+				</section>
+				
+				<section>
+					<h2>Best Diner Party!</h2>
+<pre><code class="Java" data-trim contenteditable>
+public class DinnerParty {
+
+  @Rule
+  public final JUnitSoftAssertions softly = new JUnitSoftAssertions();
+  
+  @Test
+  public void host_dinner_party_where_nobody_dies() throws Exception {
+    Mansion mansion = new Mansion();
+    mansion.hostPotentiallyMurderousDinnerParty();
+  
+    softly.assertThat(mansion.guests()).as("Living Guests").isEqualTo(7);
+    softly.assertThat(mansion.kitchen()).as("Kitchen").isEqualTo("clean");
+    softly.assertThat(mansion.library()).as("Library").isEqualTo("clean");
+  ... // without assertAll!!!1
+  }
+}
+</code></pre>
+				</section>
+				
+								<section>
+					<h2>They are mad!</h2>
+						<img width="60%" src="resources\img\madAreThey.PNG"/>
+				</section>
+			
+				<section style="text-align: left;" data-transition="slide" data-background="lime" data-background-transition="zoom">
+					<h1>?</h1>
+					<h2>Thx!</h2>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="resources/lib/js/head.min.js"></script>
+		<script src="resources/js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+			slideNumber: true,
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'resources/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'resources/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'resources/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'resources/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'resources/plugin/zoom-js/zoom.js', async: true },
+					{ src: 'resources/plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
